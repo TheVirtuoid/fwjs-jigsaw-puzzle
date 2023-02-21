@@ -1,26 +1,13 @@
 export default class Vertex {
-	#x;
-	#y;
-	#z;
-	#name;
+	#id;
 
 	constructor(args = {}) {
-		const { x = 0, y = 0, z = 0, name = '' } = args;
-		this.#x = x;
-		this.#y = y;
-		this.#z = z;
-		this.#name = name;
+		const { id = '' } = args;
+		this.#id = name;
+		Object.seal(this);
 	}
 
-	get location() {
-		return {
-			x: this.#x,
-			y: this.#y,
-			z: this.#z
-		};
-	}
-
-	get name() {
-		return this.#name;
+	get id() {
+		return this.#id;
 	}
 }
