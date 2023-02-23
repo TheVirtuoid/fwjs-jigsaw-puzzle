@@ -10,8 +10,9 @@ Note: For all immutable objects, use ```Object.seal()```.
    2. Is immutable
 2. There must exist a 'Piece' that:
    1. Contains an array of Vertices
-   2. Contains a unique identifier
-   3. Is immutable
+   2. Must contain at least 1 Vertex
+   3. Contains a unique identifier
+   4. Is immutable
 3. Pieces can share vertices
    1. When two pieces share two or more vertices, they are said to be connected.
 4. There must exist a 'Puzzle' that:
