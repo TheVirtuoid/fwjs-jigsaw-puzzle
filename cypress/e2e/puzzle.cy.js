@@ -1,30 +1,75 @@
-import Piece from "../../src/js/classes/Piece.js";
-import Vertex from "../../src/js/classes/Vertex.js";
-import Puzzle from "../../src/js/classes/Puzzle.js";
-
-describe('testing the puzzle', () => {
-	let vertex1, vertex2, vertex3;
-	let piece1, piece2;
-
-	beforeEach(() => {
-		vertex1 = new Vertex({ id: 1 });
-		vertex2 = new Vertex({ id: 2 });
-		vertex3 = new Vertex({ id: 3 });
-		piece1 = new Piece({ id: 'a', vertices: [ vertex1, vertex2 ] });
-		piece2 = new Piece({ id: 'b', vertices: [ vertex2, vertex3 ] });
+describe('Puzzle:', () => {
+	/*
+			const puzzle = new Puzzle();
+			const puzzle = new Puzzle({ pieces: [p1, p2, ..., pZ] });
+	 */
+	describe('creation: ', () => {
+		it('should create an empty puzzle', () => {});
+		it('should be immutable', () => {});
+		it('should throw error if pieces argument is not an array of Piece', () => {});
+		it('should report correct number of pieces', () => {});
+		it('should return Puzzle', () => {});
 	});
 
-	it('should create the instance', () => {
-		const puzzle = new Puzzle({ pieces: [ piece1, piece2 ] });
-		expect(puzzle instanceof Puzzle).to.be.true;
+	/*
+			puzzle.getPieceById(id)
+	 */
+	describe('getPieceById: ', () => {
+		it('should throw error if id is not specified', () => {});
+		it('should throw error if piece cannot be found', () => {});
+		it('should return piece', () => {});
 	});
 
-	it('should have a collection of Vertices that are unique', () => {
+	/*
+			const closesPieces = puzzle.getClosestPieces(piece)
 
+			This routine, by some magic, will determine what pieces are closest to another piece
+	 */
+	describe('getClosestPieces: ', () => {
+		it('should throw error is argument is not a Piece', () => {});
+		it('should throw error is Piece is not in the Puzzle collection', () => {});
+		it('should return the closest pieces', () => {});
 	});
 
-	it('should have a collection of Pieces that are unique', () => {});
-	it('should have all pieces connect to at least one other piece', () => {});
-	it('should contain at least two pieces', () => {});
-	it('should have no two pieces contain the same vertices exclusively', () => {});
+	/*
+			puzzle.addPiece(piece)
+	 */
+	describe('addPiece: ', () => {
+		it('should throw error if piece is not a piece', () => {});
+		it('should throw error if piece is already in collection', () => {});
+		it('should add the piece to the collection', () => {});
+		it('should return the puzzle', () => {});
+	});
+
+	/*
+			puzzle.addPieces([p1, p2, ..., pZ]);
+	 */
+	describe('addPieces: ', () => {
+		it('should throw error if argument is not an array of Pieces', () => {});
+		it('should throw error is AT LEAST ONE piece is already in the collection', () => {});
+		it('give at least one piece is already in collection, should not add ANY addition piece', () => {});
+		it('should add all the pieces', () => {});
+		it('should return puzzle', () => {});
+	});
+
+	/*
+			puzzle.removePiece(piece)
+	 */
+	describe('removePiece: ', () => {
+		it('should throw error if argument is not a Piece', () => {});
+		it('should throw error if Piece is not in the collection', () => {});
+		it('should remove the piece', () => {});
+		it('should return puzzle', () => {});
+	});
+
+	/*
+			puzzle.removePieces([p1, p2, ..., pZ])
+	 */
+	describe('removePieces: ', () => {
+		it('should throw error if argument is not an array of Pieces', () => {});
+		it('should throw error if at least one instance is not in the collection', () => {});
+		it('give at least one Piece is not in collection, should not remove ANY piece', () => {});
+		it('should remove the pieces', () => {});
+		it('should return puzzle', () => {});
+	});
 });

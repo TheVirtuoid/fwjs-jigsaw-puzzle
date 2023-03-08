@@ -1,105 +1,97 @@
 import Piece from "../../src/js/classes/Piece.js";
 import Vertex from "../../src/js/classes/Vertex.js";
 
-describe('Piece testing', () => {
-	let piece = null;
+describe('Piece: ', () => {
 
-	beforeEach(() => {
-		piece = new Piece({ id: 2, vertices: [
-				new Vertex({ id: 'a' }),
-				new Vertex({ id: 'b' })
-			]
-		});
+	/*
+			const piece = new Piece({ id: <someId> });
+	 */
+	describe('creating default: ', () => {
+		it('should throw error if no id is specified', () => {});
+		it('should create if id only specified', () => {});
+		it('should default to no vertices', () => {});
+		it('should throw error as id cannot be changed', () => {});
+		it('should throw error as no property can be added', () => {});
 	});
 
-	it('should create a Piece', () => {
-		expect(piece instanceof Piece).to.be.true;
+	/*
+		const piece = new Piece({ id: <someId>, vertices: [vtx1, vtx2, ... vtxZ] });
+	 */
+	describe('creating with vertices property: ', () => {
+		it('should throw error if vertices argument is not array or vertex object', () => {});
+		it('should return the correct number of vertices', () => {});
+		it('should throw error as vertices property cannot be changed', () => {});
 	});
 
-	it('should return an array of vertices', () => {
-		expect(Array.isArray(piece.vertices)).to.be.true;
-		expect(piece.vertices.length).to.equal(2);
+	/*
+			piece.addVertex(vtx);
+	 */
+	describe('addVertex: ', () => {
+		it('should throw error if argument is not a Vertex', () => {});
+		it('should throw error if vertex is already in the collection', () => {});
+		it('should add the vertex to the collection', () => {});
+		it('should return the piece', () => {});
 	});
 
-	it('should throw error if no id specified', () => {
-		try {
-			const piece = new Piece({ vertices: [
-					new Vertex({ id: 'a' }),
-					new Vertex({ id: 'b' })
-				]
-			});
-			expect(true).to.be.false;
-		} catch (err) {
-			expect(err.name).to.equal('TypeError');
-		}
+	/*
+			piece.addVertices([vtx1, vtx2, ..., vtxZ]);
+	 */
+	describe('addVertices: ', () => {
+		it('should throw error if argument is not an array of Vertices', () => {});
+		it('should throw error if at least one of the vertices is in the collection', () => {});
+		it('given at least one vertices is in the collection, should not add ANY vertices', () => {});
+		it('should add the vertices to the collection', () => {});
+		it('should return the piece', () => {});
 	});
 
-	it('should throw error if no vertices is specified', () => {
-		try {
-			const piece = new Piece({ id: 'v' });
-			expect(true).to.be.false;
-		} catch (err) {
-			expect(err.name).to.equal('TypeError');
-		}
+	/*
+			piece.removeVertex(vtx);
+	 */
+	describe('removing a vertex: ', () => {
+		it('should throw error if argument is not a vertex', () => {});
+		it('should remove the vertex', () => {});
+		it('should return the piece', () => {});
+		it('should throw error if vertex cannot be found in the collection', () => {});
 	});
 
-	it('should throw error is vertices is not an array of vertices', () => {
-		try {
-			const piece = new Piece({ id: 'v', vertices: 'a' });
-			expect(true).to.be.false;
-		} catch (err) {
-			expect(err.name).to.equal('TypeError');
-		}
-
-		try {
-			const piece = new Piece({ id: 'v', vertices: [ 'a' ] });
-			expect(true).to.be.false;
-		} catch (err) {
-			expect(err.name).to.equal('TypeError');
-		}
+	/*
+			piece.removeVertices([vtx1, vtx2, ..., vtxZ]);
+	 */
+	describe('removeVertices: ', () => {
+		it('should throw error if argument is not an array of vertices', () => {});
+		it('should remove all the vertices', () => {});
+		it('should return the piece', () => {});
+		it('should throw error if at least one of the vertices cannot be found in the collection', () => {});
+		it('if at least one vertex cannot be found, should NOT remove any vertices', () => {});
 	});
 
-	it('should throw error on empty array', () => {
-		try {
-			const piece = new Piece({ id: 'v', vertices: [] });
-			expect(true).to.be.false;
-		} catch (err) {
-			expect(err.name).to.equal('RangeError');
-		}
-
+	/*
+			piece.clearVertices();
+	 */
+	describe('clearVertices: ', () => {
+		it('should clear all vertices', () => {});
 	});
 
-	it('should not be able to add a property', () => {
-		try {
-			piece.badProperty = true;
-			expect(true).to.be.false;
-		} catch (err) {
-			expect(err.name).to.equal('TypeError');
-		}
+	/*
+			const vertices = piece.isConnectedTo(secondPiece);
+
+			A connection is defined as at least one Vertex in a piece can be found in another piece.
+			We return either an array of vertices if matched, or Boolean false if not matched.
+	 */
+	describe('isConnectedTo: ', () => {
+		it('should throw error if secondPiece argument is not a Piece', () => {});
+		it('should return false if the two pieces are not connected', () => {});
+		it('should return array of vertices if pieces are connected', () => {});
 	});
 
-	it('should not be able to change a property', () => {
-		try {
-			piece.id = 'bad';
-			expect(true).to.be.false;
-		}	catch (err) {
-			expect(err.name).to.equal('TypeError');
-		}
-		try {
-			piece.vertices = 'bad';
-			expect(true).to.be.false;
-		}	catch (err) {
-			expect(err.name).to.equal('TypeError');
-		}
-	});
-
-	it('should not be able to add/subtract to/from the vertices', () => {
-		try {
-			piece.vertices.push(new Vertex({ id: 3 }));
-			expect(true).to.be.false;
-		} catch (err) {
-			expect(err.name).to.equal('RangeError');
-		}
+	/*
+			const newPiece = piece.merge(secondPiece)
+	 */
+	describe('merge: ', () => {
+		it('should throw error if secondPiece argument is not a Piece', () => {});
+		it('should return a new piece with all the vertices combined', () => {});
+		it('should clear all vertices from piece', () => {});
+		it('should clear all vertices from secondPiece', () => {});
 	});
 
 });

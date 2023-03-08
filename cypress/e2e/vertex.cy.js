@@ -1,16 +1,6 @@
 import Vertex from "../../src/js/classes/Vertex.js";
 
 describe('Vertex testing', () => {
-	let vertex;
-
-	beforeEach( () => {
-		vertex = new Vertex({ id: 'a' });
-	});
-
-	it('should create', () => {
-		expect(vertex instanceof Vertex).to.be.true;
-	});
-
 	it ('should throw error if no id specified', () => {
 		try {
 			const vertex = new Vertex();
@@ -21,6 +11,7 @@ describe('Vertex testing', () => {
 	});
 
 	it('should not be able to add a property', () => {
+		const vertex = new Vertex({ id: 'a' });
 		try {
 			vertex.badProperty = true;
 			expect(true).to.be.false;
@@ -28,7 +19,9 @@ describe('Vertex testing', () => {
 			expect(err.name).to.equal('TypeError');
 		}
 	});
+
 	it('should not be able to change the id', () => {
+		const vertex = new Vertex({ id: 'a' });
 		try {
 			vertex.id = 'bad';
 			expect(true).to.be.false;
