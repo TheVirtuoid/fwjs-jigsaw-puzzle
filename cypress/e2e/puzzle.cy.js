@@ -7,6 +7,7 @@ describe('Puzzle:', () => {
 		it('should create an empty puzzle', () => {});
 		it('should be immutable', () => {});
 		it('should throw error if pieces argument is not an array of Piece', () => {});
+		it('should throw error if there are duplicate pieces (same id) in pieces argument', () => {});
 		it('should report correct number of pieces', () => {});
 		it('should return Puzzle', () => {});
 	});
