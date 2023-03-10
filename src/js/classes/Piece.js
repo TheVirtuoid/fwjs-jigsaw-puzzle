@@ -61,9 +61,16 @@ export default class Piece {
 		if (!(piece instanceof Piece)) {
 			throw new TypeError(`"piece" argument must be an instance of Piece.`);
 		}
-		const connectedPieces =
+		const connectedPieces = [...this.#vertices.values()].filter((vertex) => piece.isVertexPresent(vertex));
+		return connectedPieces.length ? connectedPieces : false;
 	}
 
-	merge(piece) {}
+	merge(piece) {
+		const newPiece = new Piece();
+		newPiece.addVertices
+		this.#vertices.forEach((vertex) => newPiece.addVertex)
+	}
+
+	isVertexPresent(vertex) {}
 
 }

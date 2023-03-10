@@ -337,4 +337,31 @@ describe('Piece: ', () => {
 			expect(piece2.vertexCount).to.equal(0);
 		});
 	});
+
+	/*
+			const vertexExist = piece.isVertexPresent(vertex)
+	 */
+	describe('isVertexPresent: ', () => {
+		it('should throw error is argument is not Vertex', () => {
+			const piece = new Piece({ vertices: [] });
+			try {
+				piece.isVertexPresent('badone');
+				expect(true).to.be.false;
+			} catch (err) {
+				expect(err.name).to.equal('TypeError');
+			}
+		});
+		it('should return false if vertex is not present', () => {
+			const vertex1 = new Vertex();
+			const piece = new Piece({ vertices: [] });
+			const vertexPresent = piece.isVertexPresent(vertex1);
+			expect(vertexPresent).to.be.false;
+		});
+		it('should return true if vertex is present', () => {
+			const vertex1 = new Vertex();
+			const piece = new Piece({ vertices: [vertex1] });
+			const vertexPresent = piece.isVertexPresent(vertex1);
+			expect(vertexPresent).to.be.true;
+		});
+	});
 });
