@@ -122,7 +122,7 @@ describe('Piece: ', () => {
 				piece.addVertices([vertex1, vertex2]);
 				expect(true).to.be.false;
 			} catch (err) {
-				expect(err.name).to.equal('TypeError');
+				expect(err.name).to.equal('RangeError');
 			}
 		});
 		it('given at least one vertices is in the collection, should not add ANY vertices', () => {
@@ -134,6 +134,26 @@ describe('Piece: ', () => {
 				expect(true).to.be.false;
 			} catch (err) {
 				expect(piece.vertexCount).to.equal(1);
+			}
+		});
+		it('should throw error is duplicate vertices are found in vertices argument', () => {
+			const vertex1 = new Vertex();
+			const piece = new Piece();
+			try {
+				piece.addVertices([vertex1, vertex1]);
+				expect(true).to.be.false;
+			} catch (err) {
+				expect(err.name).to.equal('RangeError');
+			}
+		});
+		it('given a duplicate error, should not add ANY vertices', () => {
+			const vertex1 = new Vertex();
+			const piece = new Piece();
+			try {
+				piece.addVertices([vertex1, vertex1]);
+				expect(true).to.be.false;
+			} catch (err) {
+				expect(piece.vertexCount).to.equal(0);
 			}
 		});
 		it('should add the vertices to the collection', () => {
@@ -186,7 +206,7 @@ describe('Piece: ', () => {
 				piece.removeVertex(vertex2);
 				expect(true).to.be.false;
 			} catch (err) {
-				expect(err.name).to.equal('TypeError');
+				expect(err.name).to.equal('RangeError');
 			}
 		});
 	});
@@ -228,7 +248,7 @@ describe('Piece: ', () => {
 				piece.removeVertices([vertex1, vertex2]);
 				expect(true).to.be.false;
 			} catch (err) {
-				expect(err.name).to.equal('TypeError');
+				expect(err.name).to.equal('RangeError');
 			}
 		});
 		it('if at least one vertex cannot be found, should NOT remove any vertices', () => {
@@ -240,6 +260,28 @@ describe('Piece: ', () => {
 				expect(true).to.be.false;
 			} catch (err) {
 				expect(piece.vertexCount).to.equal(1);
+			}
+		});
+		it('should throw error is duplicate vertices are found in vertices argument', () => {
+			const vertex1 = new Vertex();
+			const vertex2 = new Vertex();
+			const piece = new Piece({ vertices: [vertex1, vertex2] });
+			try {
+				piece.removeVertices([vertex1, vertex1]);
+				expect(true).to.be.false;
+			} catch (err) {
+				expect(err.name).to.equal('RangeError');
+			}
+		});
+		it('given a duplicate error, should not remove ANY vertices', () => {
+			const vertex1 = new Vertex();
+			const vertex2 = new Vertex();
+			const piece = new Piece({ vertices: [vertex1, vertex2] });
+			try {
+				piece.removeVertices([vertex1, vertex1]);
+				expect(true).to.be.false;
+			} catch (err) {
+				expect(piece.vertexCount).to.equal(2);
 			}
 		});
 	});
@@ -255,12 +297,12 @@ describe('Piece: ', () => {
 			piece.clearVertices();
 			expect(piece.vertexCount).to.equal(0);
 		});
-		it('should return the piece', () => {
+		it('should return the array of cleared vertices', () => {
 			const vertex1 = new Vertex();
 			const vertex2 = new Vertex();
 			const piece = new Piece({ vertices: [vertex1, vertex2] });
-			const newPiece = piece.clearVertices();
-			expect(newPiece === piece).to.be.true;
+			const vertices = piece.clearVertices();
+			expect(vertices.length).to.equal(2);
 		});
 	});
 
@@ -315,7 +357,7 @@ describe('Piece: ', () => {
 			const vertex3 = new Vertex();
 			const piece1 = new Piece({ vertices: [vertex1, vertex2]});
 			const piece2 = new Piece({ vertices: [vertex2, vertex3]});
-			const newPiece = piece2.merge(piece2);
+			const newPiece = piece1.merge(piece2);
 			expect(newPiece.vertexCount).to.equal(3);
 		});
 		it('should clear all vertices from piece', () => {
@@ -324,7 +366,7 @@ describe('Piece: ', () => {
 			const vertex3 = new Vertex();
 			const piece1 = new Piece({ vertices: [vertex1, vertex2]});
 			const piece2 = new Piece({ vertices: [vertex2, vertex3]});
-			const newPiece = piece2.merge(piece2);
+			const newPiece = piece1.merge(piece2);
 			expect(piece1.vertexCount).to.equal(0);
 		});
 		it('should clear all vertices from secondPiece', () => {
