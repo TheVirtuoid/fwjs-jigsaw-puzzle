@@ -28,7 +28,7 @@ describe('Puzzle:', () => {
 		});
 		it('should throw error if pieces argument is not an array of Piece', () => {
 			try {
-				const puzzle = new Puzzle({ pieces: 'badone' });
+				new Puzzle({ pieces: 'badone' });
 				expect(true).to.be.false;
 			} catch(err) {
 				expect(err.name).to.equal('TypeError');
@@ -36,12 +36,11 @@ describe('Puzzle:', () => {
 		});
 		it('should throw error if there are duplicate pieces (same id) in pieces argument', () => {
 			const piece1 = new Piece();
-			const piece2 = new Piece();
 			try {
-				const puzzle = new Puzzle({ pieces: [piece1, piece2] });
+				new Puzzle({ pieces: [piece1, piece1] });
 				expect(true).to.be.false;
 			} catch(err) {
-				expect(err.name).to.equal('TypeError');
+				expect(err.name).to.equal('RangeError');
 			}
 		});
 		it('should report correct number of pieces', () => {
@@ -71,15 +70,19 @@ describe('Puzzle:', () => {
 			const piece1 = new Piece();
 			const piece2 = new Piece();
 			const puzzle = new Puzzle({ pieces: [piece1]});
-			const closestPiece = puzzle.getClosestPieces(piece2);
-			expect(closestPiece).to.be.false;
+			const closestPieces = puzzle.getClosestPieces(piece2);
+			expect(closestPieces).to.be.false;
 		});
 		it('should return the closest pieces', () => {
 			const piece1 = new Piece();
 			const piece2 = new Piece();
-			const puzzle = new Puzzle({ pieces: [piece1, piece2]});
-			const closestPiece = puzzle.getClosestPieces(piece2);
-			expect(closestPiece === piece1).to.be.true;
+			const piece3 = new Piece();
+			const puzzle = new Puzzle({ pieces: [piece1, piece2, piece3]});
+			const closestPieces = puzzle.getClosestPieces(piece2);
+			expect(closestPieces.length).to.equal(2);
+			console.log(closestPieces);
+			expect(closestPieces.find((piece) => piece === piece1)).not.to.be.undefined;
+			expect(closestPieces.find((piece) => piece === piece3)).not.to.be.undefined;
 		});
 	});
 
@@ -103,7 +106,7 @@ describe('Puzzle:', () => {
 				puzzle.addPiece(piece);
 				expect(true).to.be.false;
 			} catch(err) {
-				expect(err.name).to.equal('TypeError');
+				expect(err.name).to.equal('RangeError');
 			}
 		});
 		it('should add the piece to the collection', () => {
@@ -142,7 +145,7 @@ describe('Puzzle:', () => {
 				puzzle.addPieces([piece2, piece3, piece1]);
 				expect(true).to.be.false;
 			} catch(err) {
-				expect(err.name).to.equal('TypeError');
+				expect(err.name).to.equal('RangeError');
 			}
 		});
 		it('give at least one piece is already in collection, should not add ANY addition piece', () => {
@@ -197,7 +200,7 @@ describe('Puzzle:', () => {
 				puzzle.removePiece(piece2);
 				expect(true).to.be.false;
 			} catch(err) {
-				expect(err.name).to.equal('TypeError');
+				expect(err.name).to.equal('RangeError');
 			}
 		});
 		it('should remove the piece', () => {
@@ -238,7 +241,7 @@ describe('Puzzle:', () => {
 				puzzle.removePieces([piece1, piece2, piece3]);
 				expect(true).to.be.false;
 			} catch(err) {
-				expect(err.name).to.equal('TypeError');
+				expect(err.name).to.equal('RangeError');
 			}
 		});
 		it('give at least one Piece is not in collection, should not remove ANY piece', () => {
@@ -250,7 +253,7 @@ describe('Puzzle:', () => {
 				puzzle.removePieces([piece1, piece2, piece3]);
 				expect(true).to.be.false;
 			} catch(err) {
-				expect(err.name).to.equal('TypeError');
+				expect(err.name).to.equal('RangeError');
 			}
 		});
 		it('should remove the pieces', () => {
