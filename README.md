@@ -38,5 +38,31 @@ vertex is checked.
 7. After checking all vertices, if the piece has two or more vertices that
 match to the other piece, the two pieces are placed together and then 
 be moved together.
-8. The game is over when there are no individual pieces.
+8. The game is over when there is one individual piece.
 
+
+## Game Object
+1. There will exist a Game object that will control the game
+2. It will create and initialize the Puzzle object
+3. It will create and initialize the Graphics object
+4. It will determine the number of pieces needed for a single play of the game
+5. It will determine what graphics image to use.
+6. It will determine what cutting design to use.
+7. It will cut the puzzle
+8. It will play the game as described in the 'Order of Play' section
+9. It will shut down the graphics object
+10. It will shut down the puzzle object
+11. It will receive communications from the Graphics object as to the placement of a pieces
+    1. This is so that it can determine if two pieces are close enough to connect
+
+## Graphics Object
+1. There will exist a Graphics object that will control the graphics
+   1. The graphics object will obfuscate the graphics engine being used
+2. It will build a Board that will contain the puzzle
+3. Graphically, it will create / remove a Vertex
+4. Graphically, it will create / remove a Piece
+5. Graphically, it will create / remove a Puzzle
+6. It will control the pick up / movement / place down of pieces
+
+## Graphics Engine
+1. An obfuscated interface between the Graphics object and a Graphics Library.

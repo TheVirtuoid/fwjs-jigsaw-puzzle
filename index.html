@@ -2,12 +2,53 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <title>Fun with JavaScript Presents: Jigsaw Puzzle</title>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/main.js"></script>
+  <h1>Jigsaw Puzzle</h1>
+  <div id="app">
+    <section id="actions">
+      <button id="select-image">Select Image</button>
+      <button id="select-pieces">Select Number of Pieces</button>
+      <button id="select-cut">Select Cut Design</button>
+      <button id="go">Go!</button>
+      <input type="file" id="jigsaw-image" name="jigsaw-image"
+             accept="image/*" hidden />
+      <p>Number of Pieces: <span id="display-number-of-pieces"></span></p>
+      <p>Cut Design: <span id="display-cut-design"></span></p>
+    </section>
+    <div id="board">
+      <canvas width="500" height="500"></canvas>
+      <section id="cut"></section>
+    </div>
+    <canvas width="500" height="500" id="temp"></canvas>
+    <dialog id="number-of-pieces">
+      <p>Select the number of pieces</p>
+      <form method="dialog">
+        <select id="selected-number-of-pieces">
+          <option default value="4">4</option>
+          <option value="16">16</option>
+        </select>
+        <div>
+          <button value="cancel">Cancel</button>
+          <button value="ok">Ok</button>
+        </div>
+      </form>
+    </dialog>
+    <dialog id="cut-design">
+      <p>Select cut design</p>
+      <form method="dialog">
+        <select id="selected-cut-design">
+          <option default value="square">Square</option>
+        </select>
+        <div>
+          <button value="cancel">Cancel</button>
+          <button value="ok">Ok</button>
+        </div>
+      </form>
+    </dialog>
+  </div>
+    <script type="module" src="src/jigsawPuzzle.js"></script>
   </body>
 </html>

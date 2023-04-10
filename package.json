@@ -12,6 +12,10 @@
   },
   "devDependencies": {
     "cypress": "^12.7.0",
+    "postcss-nesting": "^11.2.2",
     "vite": "^4.1.0"
+  },
+  "dependencies": {
+    "phaser": "^3.55.2"
   }
 }
