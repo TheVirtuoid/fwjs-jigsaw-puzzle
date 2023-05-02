@@ -26,30 +26,31 @@ body {
 
 #board {
     position: relative;
-
-    & canvas {
-        background-color: black;
-        position: absolute;
-        top: 0;
-        left: 0;
-        /*width: calc(16 * 3rem);
-        height: calc(9 * 3rem);*/
-        /*width: 500px;
-        height: 500px;*/
-    }
+    background-color: black;
+    top: 0;
+    left: 0;
 }
+
+
 #cut {
     position: relative;
 
     & span {
         position: absolute;
         background-color: transparent;
-        /*border: 1px solid black;*/
-        box-shadow: 0 0 1px 1px black;
-        cursor: pointer;
+       box-shadow: 0 0 1px 1px black;
+        cursor: grab;
+
+        &.dragging {
+            cursor: grabbing;
+        }
     }
 }
 
 #temp {
     display: none;
+}
+
+.hidden {
+    visibility: hidden;
 }
