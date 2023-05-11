@@ -1,6 +1,25 @@
+import GraphicPuzzle from "../../../src/js/classes/graphic/GraphicPuzzle.js";
+import { params } from "../../fixtures/graphicData.js";
+
+let puzzle;
+const { boardWidth, boardHeight, imageUrl } = params;
+beforeEach(() => {
+	puzzle = new GraphicPuzzle({ boardHeight, boardWidth, imageUrl });
+})
+
 describe('GraphicPuzzle', () => {
-	it('should initialize the board', () => {});
-	it('should load the image', () => {});
+	it('should initialize the board', () => {
+		expect(puzzle.board).not.to.be.undefined;
+		expect(puzzle.board.height).to.equal(boardHeight);
+		expect(puzzle.board.width).to.equal(boardWidth);
+
+	});
+	it('should load the image', () => {
+		const image = new Image();
+		image.src = imageUrl;
+		puzzle.setImage(image);
+		expect(puzzle.image).not.to.be.undefined;
+	});
 	it('should retrieve the piece/cut pattern', () => {});
 	it('should cut out the pieces', () => {});
 	it('should shuffle the pieces', () => {});

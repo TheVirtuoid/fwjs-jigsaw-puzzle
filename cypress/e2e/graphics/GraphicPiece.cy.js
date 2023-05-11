@@ -1,15 +1,18 @@
 import GraphicPiece from "../../../src/js/classes/graphic/GraphicPiece.js";
+import { imageUrl, params } from "./../../fixtures/graphicData.js";
 
 let piece;
-const canvasWidth = 700;
-const canvasHeight = 700;
-const puzzleWidth = 500;
-const puzzleHeight = 500;
-const pieceWidth = puzzleWidth / 4;
-const pieceHeight = puzzleHeight / 4;
+const { puzzleWidth, puzzleHeight, pieceWidth, pieceHeight} = params;
 let image = null;
 
-before(() => {
+before( () => {
+	// cy.visit('localhost:5173/index.html');
+	image = new Image();
+	image.src = imageUrl;
+});
+
+/*
+before((done) => {
 	console.log(1);
 	cy.visit('localhost:5173/index.html');
 	console.log(2);
@@ -30,15 +33,15 @@ before(() => {
 					ctx.drawImage(img, 0, 0, 500, 500);
 					image = new Image();
 					image.src = tempCanvas.toDataURL('image/jpg');
-					// 	done();
+					console.log(image);
+					done();
 				};
 			});
 	console.log(5);
 
 });
+*/
 beforeEach(() => {
-	console.log(6);
-
 	piece = new GraphicPiece({
 		image,
 		puzzleWidth,
@@ -47,12 +50,8 @@ beforeEach(() => {
 });
 describe('GraphicPiece', () => {
 	it('should be the correct width/height', () => {
-		console.log(7);
-
-		console.log(piece);
-		console.log(piece.width, puzzleWidth);
-		expect(piece.width).to.equal(puzzleWidth);
-		expect(piece.height).to.equal(puzzleHeight);
+		expect(piece.width).to.equal(pieceWidth);
+		expect(piece.height).to.equal(pieceHeight);
 		expect(false).to.be.true;
 	});
 	it('should contain a span and a canvas with an image', () => {
