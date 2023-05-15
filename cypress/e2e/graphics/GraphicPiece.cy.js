@@ -1,12 +1,12 @@
 import GraphicPiece from "../../../src/js/classes/graphic/GraphicPiece.js";
 import { imageUrl, params } from "./../../fixtures/graphicData.js";
 
-let piece;
-const { puzzleWidth, puzzleHeight, pieceWidth, pieceHeight} = params;
+const { puzzleWidth, puzzleHeight, pieceWidth: width, pieceHeight: height } = params;
+const id = 'id';
 let image = null;
 
 before( () => {
-	// cy.visit('localhost:5173/index.html');
+	cy.visit('localhost:5173/index.html');
 	image = new Image();
 	image.src = imageUrl;
 });
@@ -41,20 +41,64 @@ before((done) => {
 
 });
 */
-beforeEach(() => {
-	piece = new GraphicPiece({
-		image,
-		puzzleWidth,
-		puzzleHeight
-	});
-});
 describe('GraphicPiece', () => {
-	it('should be the correct width/height', () => {
-		expect(piece.width).to.equal(pieceWidth);
-		expect(piece.height).to.equal(pieceHeight);
-		expect(false).to.be.true;
+	it('should throw exception if image is not an Image', () => {
+		try {
+			new GraphicPiece({ image: 'badone', width, height, id });
+			expect(true).to.be.false;
+		} catch (err) {
+			expect(err.name).to.equal('TypeError');
+		}
 	});
+	it('should throw exception if width is not a number', () => {
+		try {
+			new GraphicPiece({ image, width: 'badone', height, id });
+			expect(true).to.be.false;
+		} catch (err) {
+			expect(err.name).to.equal('TypeError');
+		}
+	});
+	it('should throw exception if width is less than 1', () => {
+		try {
+			new GraphicPiece({ image, width: 0, height, id });
+			expect(true).to.be.false;
+		} catch (err) {
+			expect(err.name).to.equal('RangeError');
+		}
+	});
+	it('should throw exception if height is not a number', () => {
+		try {
+			new GraphicPiece({ image, width, height: 'badone', id });
+			expect(true).to.be.false;
+		} catch (err) {
+			expect(err.name).to.equal('TypeError');
+		}
+	});
+	it('should throw exception if height is less than 1', () => {
+		try {
+			new GraphicPiece({ image, width, height: 0, id });
+			expect(true).to.be.false;
+		} catch (err) {
+			expect(err.name).to.equal('RangeError');
+		}
+	});
+	it('should throw exception if id is not set', () => {
+		try {
+			new GraphicPiece({ image, width, height });
+			expect(true).to.be.false;
+		} catch (err) {
+			expect(err.name).to.equal('TypeError');
+		}
+	});
+
+	it('should be the correct width/height', () => {
+		const piece = new GraphicPiece({ image, width, height, id });
+		expect(piece.width).to.equal(width);
+		expect(piece.height).to.equal(height);
+	});
+
 	it('should contain a span and a canvas with an image', () => {
+		const piece = new GraphicPiece({ image, width, height, id });
 		const dom = piece.dom;
 		expect(dom instanceof HTMLSpanElement).to.be.true;
 		const canvas = dom.firstChild;
