@@ -40,6 +40,7 @@ export default class Cut16Square extends Pattern {
 		const cols = this.numPieces / 4;
 		const pieceHeight = puzzleHeight / cols;
 		const pieceWidth = puzzleWidth / rows;
+		const promises = [];
 		for(let r = 0; r < rows; r++) {
 			for(let c = 0; c < cols; c++) {
 				const id = `${r}-${c}`;
@@ -48,9 +49,7 @@ export default class Cut16Square extends Pattern {
 				canvas.height = pieceHeight;
 				const context = canvas.getContext('2d');
 				context.drawImage(image, c * pieceWidth, r * pieceHeight, pieceWidth, pieceHeight, 0, 0, pieceWidth, pieceHeight);
-				const pieceImage = new Image();
-				pieceImage.src = canvas.toDataURL();
-				const piece = new GraphicPiece({ image: pieceImage, width: pieceWidth, height: pieceHeight, id });
+				const piece = new GraphicPiece({ image: canvas, width: pieceWidth, height: pieceHeight, id });
 				pieces.push(piece);
 			}
 		}

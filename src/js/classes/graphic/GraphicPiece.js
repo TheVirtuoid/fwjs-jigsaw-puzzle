@@ -10,8 +10,8 @@ export default class GraphicPiece extends Piece {
 	constructor(args = {}) {
 		super(args);
 		const { width, height, image, id } = args;
-		if (!(image instanceof Image)) {
-			throw new TypeError(`'image' argument must be type Image.`);
+		if (!(image instanceof Image) && !(image instanceof HTMLCanvasElement)) {
+			throw new TypeError(`'image' argument must be type Image oir HTMLCanvasElement.`);
 		}
 		if(isNaN(height)) {
 			throw new TypeError(`'height' argument must be a number.`);
@@ -41,7 +41,7 @@ export default class GraphicPiece extends Piece {
 		canvas.width = this.#width;
 		canvas.height = this.#height;
 		const context = canvas.getContext('2d');
-		context.drawImage(this.#image, 0, 0);
+		context.drawImage(this.#image, 0, 0, this.#width, this.#height, 0, 0, this.#width, this.#height);
 		span.appendChild(canvas);
 		this.#dom = span;
 	}

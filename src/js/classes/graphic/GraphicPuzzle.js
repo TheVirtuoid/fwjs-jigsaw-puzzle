@@ -147,7 +147,6 @@ export default class GraphicPuzzle extends Puzzle {
 
 	#startDrop(event) {
 		const { target } = event;
-		console.log(target);
 		if (target instanceof HTMLCanvasElement) {
 			const piece = target.parentElement;
 			this.#pieceInMotion = piece;
