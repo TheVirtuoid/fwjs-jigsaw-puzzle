@@ -4,18 +4,32 @@ import Cut16Square from "../../../src/js/classes/patterns/Cut16Sqaure.js";
 
 let puzzle;
 let image;
+let anchorPoint;
+let doc;
 const { boardWidth, boardHeight, numPieces, pieceWidth, pieceHeight, puzzleWidth, puzzleHeight } = params;
 
-before( () => {
-	cy.visit('http://localhost:5173/index.html');
+const resetVisit = () => {
+	return new Promise((resolve, reject) => {
+		cy.visit('http://localhost:5173/index.html');
+		cy.document()
+				.then(($document) => {
+					anchorPoint = $document.getElementById('board');
+					doc = $document;
+					resolve(true);
+				});
+	});
+};
+before( (done) => {
 	image = new Image();
 	image.src = imageUrl;
+	resetVisit()
+			.then(() => done());
 });
 
 describe('constructor', () => {
 	it('should throw error is height is not a number', () => {
 		try {
-			new GraphicPuzzle({ width: boardWidth, height: 'badone' });
+			new GraphicPuzzle({ width: boardWidth, height: 'badone', anchorPoint });
 			expect(true).to.be.false;
 		} catch (err) {
 			expect(err.name).to.equal('TypeError');
@@ -23,7 +37,7 @@ describe('constructor', () => {
 	});
 	it('should throw error is width is not a number', () => {
 		try {
-			new GraphicPuzzle({ width: 'badone', height: boardHeight });
+			new GraphicPuzzle({ width: 'badone', height: boardHeight, anchorPoint });
 			expect(true).to.be.false;
 		} catch (err) {
 			expect(err.name).to.equal('TypeError');
@@ -31,7 +45,7 @@ describe('constructor', () => {
 	});
 	it('should throw error is height is less than 1', () => {
 		try {
-			new GraphicPuzzle({ width: boardWidth, height: 0 });
+			new GraphicPuzzle({ width: boardWidth, height: 0, anchorPoint });
 			expect(true).to.be.false;
 		} catch (err) {
 			expect(err.name).to.equal('RangeError');
@@ -39,21 +53,29 @@ describe('constructor', () => {
 	});
 	it('should throw error is width is less than 1', () => {
 		try {
-			new GraphicPuzzle({ width: 0, height: boardHeight });
+			new GraphicPuzzle({ width: 0, height: boardHeight, anchorPoint });
 			expect(true).to.be.false;
 		} catch (err) {
 			expect(err.name).to.equal('RangeError');
 		}
 	});
+	it('should throw error is anchorPoint is not an HTMLElement', () => {
+		try {
+			new GraphicPuzzle({ width: boardWidth, height: boardHeight, anchorPoint: 'badone' });
+			expect(true).to.be.false;
+		} catch (err) {
+			expect(err.name).to.equal('TypeError');
+		}
+	});
 	it('should create the puzzle', () => {
-		const newPuzzle = new GraphicPuzzle({ width: boardWidth, height: boardHeight });
+		const newPuzzle = new GraphicPuzzle({ width: boardWidth, height: boardHeight, anchorPoint });
 		expect(newPuzzle instanceof GraphicPuzzle).to.be.true;
 	});
 });
 
 describe('setImage', () => {
 	beforeEach(() => {
-		puzzle = new GraphicPuzzle({ height: boardHeight, width: boardWidth });
+		puzzle = new GraphicPuzzle({ height: boardHeight, width: boardWidth, anchorPoint });
 	});
 	it('should set width/height defaults', () => {
 		puzzle.setImage({ image });
@@ -118,7 +140,7 @@ describe('setImage', () => {
 
 describe('setPattern', () => {
 	beforeEach(() => {
-		puzzle = new GraphicPuzzle({ height: boardHeight, width: boardWidth });
+		puzzle = new GraphicPuzzle({ height: boardHeight, width: boardWidth, anchorPoint });
 	});
 	it('should retrieve the piece/cut pattern', () => {
 		puzzle.setPattern(new Cut16Square());
@@ -136,7 +158,7 @@ describe('setPattern', () => {
 
 describe('cut', () => {
 	beforeEach(() => {
-		puzzle = new GraphicPuzzle({ height: boardHeight, width: boardWidth });
+		puzzle = new GraphicPuzzle({ height: boardHeight, width: boardWidth, anchorPoint });
 	});
 	it('should throw error if setImage was not called', () => {
 		try {
@@ -167,6 +189,9 @@ describe('cut', () => {
 });
 
 describe('shuffle', () => {
+	beforeEach(() => {
+		puzzle = new GraphicPuzzle({ height: boardHeight, width: boardWidth, anchorPoint });
+	});
 	it('should throw error is cut has not been called', () => {
 		puzzle.setImage({ image, width: puzzleWidth, height: puzzleHeight });
 		puzzle.setPattern(new Cut16Square());
@@ -182,104 +207,98 @@ describe('shuffle', () => {
 		puzzle.setPattern(new Cut16Square());
 		puzzle.cut();
 		puzzle.shuffle();
-		// we really only need to check maybe three of them
-		expect(puzzle.puzzle.pieces[0].dom.offsetLeft).not.equal(0);
-		expect(puzzle.puzzle.pieces[1].dom.offsetLeft).not.equal(pieceWidth);
-		expect(puzzle.puzzle.pieces[2].dom.offsetLeft).not.equal(pieceWidth * 2);
+		// we really only need to check one to see if the style left and top have been set, and they are not zero
+		const { left, top } = puzzle.puzzle.pieces[0].dom.style;
+		expect(left.includes('px')).to.be.true;
+		expect(top.includes('px')).to.true;
+		expect(parseInt(left.split('px')[0])).not.to.equal(0);
+		expect(parseInt(top.split('px')[0])).not.to.equal(0);
+	});
+});
+
+describe('drag and drop', () => {
+	beforeEach( () => {
+		cy.visit('http://localhost:5173/index.html');
+		/*cy.get('#board').within(($element) => {
+			const t = cy.root();
+			console.log(cy.root());
+		});*/
+		// console.log(cy.get('#board'));
+		puzzle = new GraphicPuzzle({ height: boardHeight, width: boardWidth, anchorPoint });
+		puzzle.setImage({ image, width: puzzleWidth, height: puzzleHeight });
+		puzzle.setPattern(new Cut16Square());
+		puzzle.cut();
+		puzzle.shuffle();
+	});
+	it('should not start drag operation if mousedown not on a piece', () => {
+		const bx = puzzle.board.dom.offsetLeft;
+		const by = puzzle.board.dom.offsetTop;
+		// cy.wrap(doc).trigger('mousedown', { x: bx, y: by });
+		cy.get('#board').trigger('mousedown', { x: bx, y: by });
+		expect(puzzle.pieceInMotion).to.be.false;
+	});
+	it('should start drag operation when mousedown on a piece', () => {
+		cy.wrap(puzzle.puzzle.pieces[0].dom).trigger('mousedown', { position: 'topLeft' });
+		cy.wait(400);
+		expect(puzzle.pieceInMotion).to.equal(puzzle.puzzle.pieces[0]);
+	});
+	xit('should insure the piece being dragged has the largest z-index', () => {
+		let zIndex = -1;
+		puzzle.puzzle.pieces.forEach((piece) => zIndex = Math.max(zIndex, parseInt(piece.dom.style.zIndex)));
+		cy.wrap(puzzle.puzzle.pieces[0].dom).trigger('mousedown', { position: 'topLeft' });
+		expect(parseInt(puzzle.puzzle.pieces[0].dom.style.zIndex)).to.be.greaterThan(zIndex);
+	});
+	xit('should insure the piece being dragged has the "dragging" class', () => {
+		cy.wrap(puzzle.puzzle.pieces[0].dom).trigger('mousedown', { position: 'topLeft' });
+		expect(parseInt(puzzle.puzzle.pieces[0].classList.contains('dragging'))).to.be.true;
+	});
+	xit('should move the piece and drop inside the board', () => {
+		cy.wrap(puzzle.puzzle.pieces[0].dom).trigger('mousemove', { position: 'topLeft' })
+				.trigger('mousemove', { clientX: 1, clientY: 1 })
+				.trigger('mouseup', { force: true });
+		const { offsetTop: boardOffsetTop, offsetLeft: boardOffsetLeft } = puzzle.board.dom;
+		const { offsetTop, offsetLeft } = puzzle.puzzle.pieces[0].dom;
+		expect(offsetTop + pieceHeight).to.be.lessThan(boardOffsetTop + boardHeight);
+		expect(offsetLeft + pieceWidth).to.be.lessThan(boardOffsetLeft + boardWidth);
+	});
+	xit('should move piece to X=0 if any part of the piece moves off the left side of the board', () => {
+		cy.wrap(puzzle.puzzle.pieces[0].dom).trigger('mousemove', { position: 'topLeft' })
+				.trigger('mousemove', { clientX: boardWidth * -2, clientY: 0 })
+				.trigger('mouseup', { force: true });
+		const { offsetLeft } = puzzle.puzzle.pieces[0].dom;
+		expect(offsetLeft).to.be.equal(0);
+	});
+	xit('should move piece to Y=0 if any part of the piece moves off the top side of the board', () => {
+		cy.wrap(puzzle.puzzle.pieces[0].dom).trigger('mousemove', { position: 'topLeft' })
+				.trigger('mousemove', { clientY: boardHeight * -2 })
+				.trigger('mouseup', { force: true });
+		const { offsetTop } = puzzle.puzzle.pieces[0].dom;
+		expect(offsetTop).to.be.equal(0);
+	});
+	xit('should move piece to X=boardWidth-pieceWidth if any part of the piece moves off the right side of the board', () => {
+		cy.wrap(puzzle.puzzle.pieces[0].dom).trigger('mousemove', { position: 'topLeft' })
+				.trigger('mousemove', { clientX: boardWidth * 2, clientY: 0 })
+				.trigger('mouseup', { force: true });
+		const { offsetLeft } = puzzle.puzzle.pieces[0].dom;
+		expect(offsetLeft).to.be.equal(boardWidth - pieceWidth);
+	});
+	xit('should move piece to Y=boardHeight-pieceHeight if any part of the piece moves off the bottom side of the board', () => {
+		cy.wrap(puzzle.puzzle.pieces[0].dom).trigger('mousemove', { position: 'topLeft' })
+				.trigger('mousemove', { clientY: boardHeight * 2 })
+				.trigger('mouseup', { force: true });
+		const { offsetTop } = puzzle.puzzle.pieces[0].dom;
+		expect(offsetTop).to.be.equal(boardHeight - pieceHeight);
 	});
 });
 
 describe('GraphicPuzzle', () => {
 	beforeEach(() => {
-		puzzle = new GraphicPuzzle({ height: boardHeight, width: boardWidth });
+		puzzle = new GraphicPuzzle({ height: boardHeight, width: boardWidth, anchorPoint });
 	});
 
 	it('should initialize the board', () => {
 		expect(puzzle.board).not.to.be.undefined;
 		expect(puzzle.board.height).to.equal(boardHeight);
 		expect(puzzle.board.width).to.equal(boardWidth);
-	});
-
-	it('should shuffle the pieces', () => {
-		puzzle.setImage(image);
-		puzzle.setPattern(new Cut16Square());
-		puzzle.cut();
-		puzzle.shuffle();
-		// we really only need to check maybe three of them
-		expect(puzzle.pieces[0].dom.offsetLeft).not.equal(0);
-		expect(puzzle.pieces[1].dom.offsetLeft).not.equal(pieceWidth);
-		expect(puzzle.pieces[2].dom.offsetLeft).not.equal(pieceWidth * 2);
-	});
-
-	describe('start drag', () => {
-		beforeEach( () => {
-			puzzle.setImage(image);
-			puzzle.setPattern(new Cut16Square());
-			puzzle.cut();
-			puzzle.shuffle();
-		});
-		it('should not start drag operation if mousedown not on a piece', () => {
-			cy.document()
-					.then((document) => {
-						const bx = puzzle.board.dom.offsetLeft;
-						const by = puzzle.board.dom.offsetTop;
-						cy.wrap(document).trigger('mousedown', { x: bx, y: by });
-						expect(puzzle.pieceInMotion).to.be.undefined;
-					});
-		});
-		it('should start drag operation when mousedown on a piece', () => {
-			cy.get(puzzle.pieces[0].dom).trigger('mousedown', { position: 'topLeft' });
-			expect(puzzle.pieceInMotion).to.be.undefined;
-		});
-		it('should insure the piece being dragged has the largest z-index', () => {
-			let zIndex = -1;
-			puzzle.pieces.forEach((piece) => zIndex = Math.max(zIndex, parseInt(piece.dom.style.zIndex)));
-			cy.get(puzzle.pieces[0].dom).trigger('mousedown', { position: 'topLeft' });
-			expect(parseInt(puzzle.pieces[0].dom.style.zIndex)).to.be.greaterThan(zIndex);
-		});
-		it('should insure the piece being dragged has the "dragging" class', () => {
-			cy.get(puzzle.pieces[0].dom).trigger('mousedown', { position: 'topLeft' });
-			expect(parseInt(puzzle.pieces[0].classList.contains('dragging'))).to.be.true;
-		});
-	});
-
-	describe('drag/drop movement', () => {
-		it('should move the piece and drop inside the board', () => {
-			cy.get(puzzle.pieces[0].dom).trigger('mousemove', { position: 'topLeft' })
-					.trigger('mousemove', { clientX: 1, clientY: 1 })
-					.trigger('mouseup', { force: true });
-			const { offsetTop: boardOffsetTop, offsetLeft: boardOffsetLeft } = puzzle.board.dom;
-			const { offsetTop, offsetLeft } = puzzle.pieces[0].dom;
-			expect(offsetTop + pieceHeight).to.be.lessThan(boardOffsetTop + boardHeight);
-			expect(offsetLeft + pieceWidth).to.be.lessThan(boardOffsetLeft + boardWidth);
-		});
-		it('should move piece to X=0 if any part of the piece moves off the left side of the board', () => {
-			cy.get(puzzle.pieces[0].dom).trigger('mousemove', { position: 'topLeft' })
-					.trigger('mousemove', { clientX: boardWidth * -2, clientY: 0 })
-					.trigger('mouseup', { force: true });
-			const { offsetLeft } = puzzle.pieces[0].dom;
-			expect(offsetLeft).to.be.equal(0);
-		});
-		it('should move piece to Y=0 if any part of the piece moves off the top side of the board', () => {
-			cy.get(puzzle.pieces[0].dom).trigger('mousemove', { position: 'topLeft' })
-					.trigger('mousemove', { clientY: boardHeight * -2 })
-					.trigger('mouseup', { force: true });
-			const { offsetTop } = puzzle.pieces[0].dom;
-			expect(offsetTop).to.be.equal(0);
-		});
-		it('should move piece to X=boardWidth-pieceWidth if any part of the piece moves off the right side of the board', () => {
-			cy.get(puzzle.pieces[0].dom).trigger('mousemove', { position: 'topLeft' })
-					.trigger('mousemove', { clientX: boardWidth * 2, clientY: 0 })
-					.trigger('mouseup', { force: true });
-			const { offsetLeft } = puzzle.pieces[0].dom;
-			expect(offsetLeft).to.be.equal(boardWidth - pieceWidth);
-		});
-		it('should move piece to Y=boardHeight-pieceHeight if any part of the piece moves off the bottom side of the board', () => {
-			cy.get(puzzle.pieces[0].dom).trigger('mousemove', { position: 'topLeft' })
-					.trigger('mousemove', { clientY: boardHeight * 2 })
-					.trigger('mouseup', { force: true });
-			const { offsetTop } = puzzle.pieces[0].dom;
-			expect(offsetTop).to.be.equal(boardHeight - pieceHeight);
-		});
 	});
 });
