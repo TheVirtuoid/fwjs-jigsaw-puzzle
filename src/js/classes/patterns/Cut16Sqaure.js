@@ -65,10 +65,10 @@ export default class Cut16Square extends Pattern {
 				context.drawImage(image, col * pieceWidth, row * pieceHeight, pieceWidth, pieceHeight, 0, 0, pieceWidth, pieceHeight);
 				const vertices = [];
 				vertices.push(
-						{ vertexId: row * (rows + 1) + col, top: 0, left: 0 },
-						{ vertexId: row * (rows + 1) + col + 1, top: 0, left: pieceWidth - 1 },
-						{ vertexId: (row + 1) * (rows + 1) + col, top: pieceHeight - 1, left: 0 },
-						{ vertexId: (row + 1) * (rows + 1) + col + 1, top: pieceHeight - 1, left: pieceWidth - 1 }
+						{ vertexId: row * (rows + 1) + col, top: 0, left: 0, relativeTop: 0, relativeLeft: 0 },
+						{ vertexId: row * (rows + 1) + col + 1, top: 0, left: pieceWidth - 1, relativeTop: 0, relativeLeft: 1 },
+						{ vertexId: (row + 1) * (rows + 1) + col, top: pieceHeight - 1, left: 0, relativeTop: 1, relativeLeft: 0 },
+						{ vertexId: (row + 1) * (rows + 1) + col + 1, top: pieceHeight - 1, left: pieceWidth - 1, relativeTop: 1, relativeLeft: 1 }
 				);
 				const piece = new GraphicPiece({ image: canvas, width: pieceWidth, height: pieceHeight, id, vertices });
 				vertices.forEach((vertexInfo) => {
@@ -102,51 +102,49 @@ export default class Cut16Square extends Pattern {
 
 	}
 
-	findFirstMatchedPiece(piece) {
-		let vertexIndex = 0;
-		let matchedPiece = null;
-		while(matchedPiece === null && vertexIndex < piece.vertices.length) {
-			const { vertexId } = piece.vertices[vertexIndex];
+	findMatchingPieces(piece) {
+		const matches = {
+			firstMatchingPiece: null,
+			relativeShifts: {
+				top: 0,
+				left: 0
+			}
+		};
+		// console.log('--------------start vertex matches-------------');
+		piece.vertices.forEach(({ vertexId }) => {
 			const placedPieceInfo = piece.getVertexInfo(vertexId);
-			// console.log(`------------vertexid: ${vertexId}, top: ${placedPieceInfo.top}, left: ${placedPieceInfo.left}------`);
-			const {vertex, pieces } = this.#vertices.get(vertexId);
-			let pieceIndex = 0;
-			while (matchedPiece === null && pieceIndex < pieces.length) {
-				const destinationPiece = pieces[pieceIndex];
+			const { pieces } = this.#vertices.get(vertexId);
+			pieces.forEach((destinationPiece) => {
 				if (destinationPiece !== piece) {
 					const vertexInfo = destinationPiece.getVertexInfo(vertexId);
-					// console.log(vertexInfo);
-					if (Math.abs(vertexInfo.left - placedPieceInfo.left) <= 3 && Math.abs(vertexInfo.top - placedPieceInfo.top) <=3 ) {
-						matchedPiece = { matchedPiece: destinationPiece, vertexId: vertexId };
-						// console.log('^^^^^^^^^^^^ MATCH! ^^^^^^^^^^^^^^^^^');
+					const onDiagonal = (Math.abs(vertexInfo.relativeLeft - placedPieceInfo.relativeLeft) +
+							Math.abs(vertexInfo.relativeTop - placedPieceInfo.relativeTop)) === 2;
+					if (Math.abs(vertexInfo.left - placedPieceInfo.left) <= 3 && Math.abs(vertexInfo.top - placedPieceInfo.top) <=3 && !onDiagonal ) {
+						matches.firstMatchingPiece = matches.firstMatchingPiece ?? { matchedPiece: destinationPiece, vertexId: vertexId };
+						// console.log(vertexInfo, placedPieceInfo);
 					}
 				}
-				pieceIndex++;
-			}
-			vertexIndex++;
-		}
-		return matchedPiece;
+			});
+		});
+		// console.log('--------------end vertex matches-------------');
+		return matches;
 	}
 
 	mergePieces(piece, matchedPieceInfo) {
-		console.log('---------------matched!-------------');
-		console.log(matchedPieceInfo);
 		const { matchedPiece, vertexId } = matchedPieceInfo;
 		const vertexInfo = piece.getVertexInfo(vertexId);
 		const matchedVertexInfo = matchedPiece.getVertexInfo(vertexId);
-		console.log('piece',vertexInfo);
-		console.log('match',matchedVertexInfo);
 		piece.adjustPosition({ top: vertexInfo.top - matchedVertexInfo.top, left: vertexInfo.left - matchedVertexInfo.left });
 
 		// determine the new position of the matchedPiece
-		let newTop = Math.min(matchedPiece.dom.offsetTop, piece.dom.offsetTop);
-		let newLeft = Math.min(matchedPiece.dom.offsetLeft, piece.dom.offsetLeft);
+		let newTop = Math.min(matchedPiece.top, piece.top);
+		let newLeft = Math.min(matchedPiece.left, piece.left);
 
 		// determine the difference between the old piece positions and the new positions
-		const pieceDiffTop = piece.dom.offsetTop - newTop;
-		const pieceDiffLeft = piece.dom.offsetLeft - newLeft;
-		const matchedDiffTop = matchedPiece.dom.offsetTop - newTop;
-		const matchedDiffLeft = matchedPiece.dom.offsetLeft - newLeft;
+		const pieceDiffTop = piece.top - newTop;
+		const pieceDiffLeft = piece.left - newLeft;
+		const matchedDiffTop = matchedPiece.top - newTop;
+		const matchedDiffLeft = matchedPiece.left - newLeft;
 
 		// go through each graphicImage and make the style adjustment
 		piece.graphicImages.forEach((graphicImage) => {
@@ -169,36 +167,14 @@ export default class Cut16Square extends Pattern {
 		// remove the old piece from the vertices list
 		piece.vertices.forEach((vertexInfo) => {
 			const { vertexId } = vertexInfo;
-			// console.log(`-------vertexid: ${vertexId} ---------------`);
 			const vertexPieces = this.#vertices.get(vertexId);
-			// console.log('pieces: ', print(vertexPieces.pieces));
 			let { vertex, pieces } = vertexPieces;
 			let newPieces = pieces.filter((testedPiece) => piece !== testedPiece).concat(matchedPiece);
 			newPieces = [...new Set(newPieces)];
 			this.#vertices.set(vertexId, { vertex, pieces: newPieces });
-			// console.log(`after: `, print(newPieces));
-
-			/*function print(pieces) {
-				let p = '';
-				pieces.forEach((piece) => {
-					p = `${p}, ${piece.id}`;
-				});
-				return p;
-			}*/
 		});
 
 
 	}
-
-	#getPiecePlacement(piece) {
-		const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = piece.dom;
-		const tl = { x: offsetLeft, y: offsetTop };
-		const tr = { x: offsetLeft + offsetWidth - 1, y: offsetTop };
-		const br = { x: offsetLeft + offsetWidth -1, y: offsetTop + offsetHeight - 1};
-		const bl = { x: offsetLeft, y: offsetTop + offsetHeight - 1};
-		return { tl, tr, br, bl };
-	}
-
-
 }
 

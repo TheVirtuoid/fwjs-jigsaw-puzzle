@@ -52,7 +52,8 @@ export default class GraphicImage {
 			return vertexInfo.vertexId == vertexId;
 		});
 		return vertexInfo ?
-				{ vertexId, top: vertexInfo.top + this.#dom.offsetTop, left: vertexInfo.left + this.#dom.offsetLeft } :
+				{ vertexId, top: vertexInfo.top + this.#dom.offsetTop, left: vertexInfo.left + this.#dom.offsetLeft,
+				relativeTop: vertexInfo.relativeTop, relativeLeft: vertexInfo.relativeLeft } :
 				vertexInfo;
 	}
 }

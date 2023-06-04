@@ -9,10 +9,11 @@ const puzzleParams = {
 	boardWidth: 700,
 	boardHeight: 700,
 	rollingZ: 1,
-	piece: null
+	piece: null,
+	sounds: {
+		drop: new Audio('/src/sounds/686743__geoff-bremner-audio__quick-click-1.wav')
+	}
 }
-
-const pieces = new Map();
 
 const jigsawImage = document.getElementById('jigsaw-image');
 const selectImage = document.getElementById('select-image');
@@ -35,7 +36,6 @@ const go = document.getElementById('go');
 const cut = document.getElementById('cut');
 
 let graphicPuzzle;
-
 
 const showNumberOfPieces = () => displayNumberOfPieces.textContent = numberOfPieces;
 const showCutDesign = () => displayCutDesign.textContent = cutDesign;
@@ -86,7 +86,8 @@ go.addEventListener('click', () => {
 	graphicPuzzle = new GraphicPuzzle({
 		height: puzzleParams.boardHeight,
 		width: puzzleParams.boardWidth,
-		anchorPoint: board
+		anchorPoint: board,
+		sounds: puzzleParams.sounds
 	});
 	graphicPuzzle.setImage({
 		image,

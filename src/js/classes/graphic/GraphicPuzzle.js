@@ -9,12 +9,13 @@ export default class GraphicPuzzle extends Puzzle {
 	#anchorPoint;
 	#startDropHandle;
 	#doDragOverHandle;
+	#sounds = {};
 	#pieceInMotion = null;
 	#rollingZ = 1;
 
 	constructor(args = {}) {
 		super(args);
-		const { width, height, anchorPoint } = args;
+		const { width, height, anchorPoint, sounds } = args;
 		if (isNaN(width)) {
 			throw new TypeError(`'width' argument must be a number.`);
 		}
@@ -48,6 +49,7 @@ export default class GraphicPuzzle extends Puzzle {
 			image: undefined,
 			pieces: new Map()
 		}
+		this.#sounds = sounds;
 		this.#board.dom.id = 'cut';
 		this.#board.dom.style.width = `${this.#board.width}px`;
 		this.#board.dom.style.height = `${this.#board.height}px`;
@@ -143,8 +145,7 @@ export default class GraphicPuzzle extends Puzzle {
 		this.#puzzle.pieces.forEach((piece, key) => {
 			const x = Math.floor(Math.random() * (this.#board.width - piece.width));
 			const y = Math.floor(Math.random() * (this.#board.height - piece.height));
-			piece.dom.style.top = `${y}px`;
-			piece.dom.style.left = `${x}px`;
+			piece.setPosition(y, x);
 		});
 	}
 
@@ -165,25 +166,27 @@ export default class GraphicPuzzle extends Puzzle {
 		const piece = this.#pieceInMotion;
 		const { movementX, movementY } = event;
 		const { offsetLeft, offsetTop } = piece.dom;
-		piece.dom.style.left = `${offsetLeft + movementX}px`;
-		piece.dom.style.top = `${offsetTop + movementY}px`;
+		piece.setPosition(offsetTop + movementY, offsetLeft + movementX);
 	}
 
 	#doDrop(event) {
 		const piece = this.#pieceInMotion;
 		const { width: boardWidth, height: boardHeight } = this.#board;
-		let left = Math.max(0, piece.dom.offsetLeft);
-		let top = Math.max(0, piece.dom.offsetTop);
-		left = Math.min(boardWidth - piece.dom.offsetWidth, left);
-		top = Math.min(boardHeight - piece.dom.offsetHeight, top);
-		piece.dom.style.left = `${left}px`;
-		piece.dom.style.top = `${top}px`;
+		let left = Math.max(0, piece.left);
+		let top = Math.max(0, piece.top);
+		left = Math.min(boardWidth - piece.width, left);
+		top = Math.min(boardHeight - piece.height, top);
+		piece.setPosition(top, left);
 		piece.dom.classList.remove('dragging');
 		document.removeEventListener('mousemove', this.#doDragOverHandle);
 		this.#pieceInMotion = null;
-		const matchedPieceInfo = this.#pattern.findFirstMatchedPiece(piece);
-		if (matchedPieceInfo) {
+		const matches = this.#pattern.findMatchingPieces(piece);
+		if (matches.firstMatchingPiece) {
+			const matchedPieceInfo = matches.firstMatchingPiece;
 			this.#pattern.mergePieces(piece, matchedPieceInfo);
+			if (this.#sounds.drop) {
+				this.#sounds.drop.play();
+			}
 			// piece.dispatchEvent(new CustomEvent('dropped'));
 		}
 

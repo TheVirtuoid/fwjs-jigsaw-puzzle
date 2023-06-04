@@ -118,7 +118,8 @@ export default class GraphicPiece extends Piece {
 		});
 		const vertexInfo = graphicImage ? graphicImage.getVertexInfo(vertexId) : vertexInfo;
 		return vertexInfo ?
-				{ vertexId, top: vertexInfo.top + this.#dom.offsetTop, left: vertexInfo.left + this.#dom.offsetLeft } :
+				{ vertexId, top: vertexInfo.top + this.#dom.offsetTop, left: vertexInfo.left + this.#dom.offsetLeft,
+				relativeTop: vertexInfo.relativeTop, relativeLeft: vertexInfo.relativeLeft } :
 				vertexInfo;
 	}
 
