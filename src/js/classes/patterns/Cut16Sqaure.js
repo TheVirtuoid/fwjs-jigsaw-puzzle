@@ -1,9 +1,15 @@
 import GraphicPiece from "../graphic/GraphicPiece.js";
 import Pattern from "./Pattern.js";
+import GraphicVertex from "../graphic/GraphicVertex.js";
+import Vertex from "../Vertex.js";
+import GraphicImage from "../graphic/GraphicImage.js";
 
 export default class Cut16Square extends Pattern {
 	static #pieces = 16;
 	static #cut = 'square'
+
+	#vertices = new Map();
+	#vertexIds = new Map();
 
 	constructor(args = {}) {
 		super();
@@ -15,6 +21,10 @@ export default class Cut16Square extends Pattern {
 
 	get cutType() {
 		return Cut16Square.#cut;
+	}
+
+	get vertices() {
+		return this.#vertices;
 	}
 
 	cut (args = {}) {
@@ -34,26 +44,161 @@ export default class Cut16Square extends Pattern {
 		if (puzzleHeight < 1) {
 			throw new RangeError(`'puzzleHeight' must be greater than or equal to 0`);
 		}
-		const pieces = [];
-
 		const rows = this.numPieces / 4;
 		const cols = this.numPieces / 4;
+		// create the vertices
+		for (let i = 0; i < (rows + 1) * (cols + 1); i++) {
+			this.#vertices.set(i, { vertex: new Vertex(), pieces: [] });
+		}
+		const pieces = [];
+		const piecesMap = new Map();
+
 		const pieceHeight = puzzleHeight / cols;
 		const pieceWidth = puzzleWidth / rows;
-		const promises = [];
-		for(let r = 0; r < rows; r++) {
-			for(let c = 0; c < cols; c++) {
-				const id = `${r}-${c}`;
+		for(let row = 0; row < rows; row++) {
+			for(let col = 0; col < cols; col++) {
+				const id = `${row}-${col}`;
 				const canvas = document.createElement('canvas');
 				canvas.width = pieceWidth;
 				canvas.height = pieceHeight;
 				const context = canvas.getContext('2d');
-				context.drawImage(image, c * pieceWidth, r * pieceHeight, pieceWidth, pieceHeight, 0, 0, pieceWidth, pieceHeight);
-				const piece = new GraphicPiece({ image: canvas, width: pieceWidth, height: pieceHeight, id });
+				context.drawImage(image, col * pieceWidth, row * pieceHeight, pieceWidth, pieceHeight, 0, 0, pieceWidth, pieceHeight);
+				const vertices = [];
+				vertices.push(
+						{ vertexId: row * (rows + 1) + col, top: 0, left: 0 },
+						{ vertexId: row * (rows + 1) + col + 1, top: 0, left: pieceWidth - 1 },
+						{ vertexId: (row + 1) * (rows + 1) + col, top: pieceHeight - 1, left: 0 },
+						{ vertexId: (row + 1) * (rows + 1) + col + 1, top: pieceHeight - 1, left: pieceWidth - 1 }
+				);
+				const piece = new GraphicPiece({ image: canvas, width: pieceWidth, height: pieceHeight, id, vertices });
+				vertices.forEach((vertexInfo) => {
+					const { vertexId } = vertexInfo;
+					const vertexData = this.#vertices.get(vertexId);
+					vertexData.pieces.push(piece);
+					this.#vertices.set(vertexId, vertexData);
+				});
 				pieces.push(piece);
 			}
 		}
 		return pieces;
 	}
+
+	#addVertex(row, col, position) {
+		const id = this.#setVertexId(row, col, position);
+		const vertex = new GraphicVertex({ id });
+		this.#vertices.set(id, { vertex, pieces: [] });
+		return vertex;
+	}
+
+	#setVertexId(row, col, position) {
+		return `${row}-${col}-${position}`;
+	}
+
+	#getId(row, col) {
+		return `${row}-${col}`;
+}
+
+	#addVerticesToMap(vertices) {
+
+	}
+
+	findFirstMatchedPiece(piece) {
+		let vertexIndex = 0;
+		let matchedPiece = null;
+		while(matchedPiece === null && vertexIndex < piece.vertices.length) {
+			const { vertexId } = piece.vertices[vertexIndex];
+			const placedPieceInfo = piece.getVertexInfo(vertexId);
+			// console.log(`------------vertexid: ${vertexId}, top: ${placedPieceInfo.top}, left: ${placedPieceInfo.left}------`);
+			const {vertex, pieces } = this.#vertices.get(vertexId);
+			let pieceIndex = 0;
+			while (matchedPiece === null && pieceIndex < pieces.length) {
+				const destinationPiece = pieces[pieceIndex];
+				if (destinationPiece !== piece) {
+					const vertexInfo = destinationPiece.getVertexInfo(vertexId);
+					// console.log(vertexInfo);
+					if (Math.abs(vertexInfo.left - placedPieceInfo.left) <= 3 && Math.abs(vertexInfo.top - placedPieceInfo.top) <=3 ) {
+						matchedPiece = { matchedPiece: destinationPiece, vertexId: vertexId };
+						// console.log('^^^^^^^^^^^^ MATCH! ^^^^^^^^^^^^^^^^^');
+					}
+				}
+				pieceIndex++;
+			}
+			vertexIndex++;
+		}
+		return matchedPiece;
+	}
+
+	mergePieces(piece, matchedPieceInfo) {
+		console.log('---------------matched!-------------');
+		console.log(matchedPieceInfo);
+		const { matchedPiece, vertexId } = matchedPieceInfo;
+		const vertexInfo = piece.getVertexInfo(vertexId);
+		const matchedVertexInfo = matchedPiece.getVertexInfo(vertexId);
+		console.log('piece',vertexInfo);
+		console.log('match',matchedVertexInfo);
+		piece.adjustPosition({ top: vertexInfo.top - matchedVertexInfo.top, left: vertexInfo.left - matchedVertexInfo.left });
+
+		// determine the new position of the matchedPiece
+		let newTop = Math.min(matchedPiece.dom.offsetTop, piece.dom.offsetTop);
+		let newLeft = Math.min(matchedPiece.dom.offsetLeft, piece.dom.offsetLeft);
+
+		// determine the difference between the old piece positions and the new positions
+		const pieceDiffTop = piece.dom.offsetTop - newTop;
+		const pieceDiffLeft = piece.dom.offsetLeft - newLeft;
+		const matchedDiffTop = matchedPiece.dom.offsetTop - newTop;
+		const matchedDiffLeft = matchedPiece.dom.offsetLeft - newLeft;
+
+		// go through each graphicImage and make the style adjustment
+		piece.graphicImages.forEach((graphicImage) => {
+			graphicImage.setPosition(graphicImage.top + pieceDiffTop, graphicImage.left + pieceDiffLeft)
+		});
+		matchedPiece.graphicImages.forEach((graphicImage) => {
+			graphicImage.setPosition(graphicImage.top + matchedDiffTop, graphicImage.left + matchedDiffLeft)
+		});
+
+		// merge the graphic pieces
+		piece.graphicImages.forEach((graphicImage) => {
+			matchedPiece.dom.appendChild(graphicImage.dom);
+			matchedPiece.graphicImages.add(graphicImage);
+		});
+
+		// set the new piece position
+		matchedPiece.setPosition(newTop, newLeft);
+		matchedPiece.zIndex = piece.zIndex;
+
+		// remove the old piece from the vertices list
+		piece.vertices.forEach((vertexInfo) => {
+			const { vertexId } = vertexInfo;
+			// console.log(`-------vertexid: ${vertexId} ---------------`);
+			const vertexPieces = this.#vertices.get(vertexId);
+			// console.log('pieces: ', print(vertexPieces.pieces));
+			let { vertex, pieces } = vertexPieces;
+			let newPieces = pieces.filter((testedPiece) => piece !== testedPiece).concat(matchedPiece);
+			newPieces = [...new Set(newPieces)];
+			this.#vertices.set(vertexId, { vertex, pieces: newPieces });
+			// console.log(`after: `, print(newPieces));
+
+			/*function print(pieces) {
+				let p = '';
+				pieces.forEach((piece) => {
+					p = `${p}, ${piece.id}`;
+				});
+				return p;
+			}*/
+		});
+
+
+	}
+
+	#getPiecePlacement(piece) {
+		const { offsetLeft, offsetTop, offsetWidth, offsetHeight } = piece.dom;
+		const tl = { x: offsetLeft, y: offsetTop };
+		const tr = { x: offsetLeft + offsetWidth - 1, y: offsetTop };
+		const br = { x: offsetLeft + offsetWidth -1, y: offsetTop + offsetHeight - 1};
+		const bl = { x: offsetLeft, y: offsetTop + offsetHeight - 1};
+		return { tl, tr, br, bl };
+	}
+
+
 }
 
