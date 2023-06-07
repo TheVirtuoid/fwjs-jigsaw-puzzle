@@ -49,7 +49,7 @@ export default class GraphicImage {
 
 	getVertexInfo(vertexId) {
 		const vertexInfo = [...this.#vertices.values()].find((vertexInfo) => {
-			return vertexInfo.vertexId == vertexId;
+			return vertexInfo.vertexId === vertexId;
 		});
 		return vertexInfo ?
 				{ vertexId, top: vertexInfo.top + this.#dom.offsetTop, left: vertexInfo.left + this.#dom.offsetLeft,
