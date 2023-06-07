@@ -9,12 +9,13 @@ export default class GraphicPuzzle extends Puzzle {
 	#anchorPoint;
 	#startDropHandle;
 	#doDragOverHandle;
+	#sounds = {};
 	#pieceInMotion = null;
 	#rollingZ = 1;
 
 	constructor(args = {}) {
 		super(args);
-		const { width, height, anchorPoint } = args;
+		const { width, height, anchorPoint, sounds } = args;
 		if (isNaN(width)) {
 			throw new TypeError(`'width' argument must be a number.`);
 		}
@@ -46,8 +47,9 @@ export default class GraphicPuzzle extends Puzzle {
 			width: undefined,
 			height: undefined,
 			image: undefined,
-			pieces: []
+			pieces: new Map()
 		}
+		this.#sounds = sounds;
 		this.#board.dom.id = 'cut';
 		this.#board.dom.style.width = `${this.#board.width}px`;
 		this.#board.dom.style.height = `${this.#board.height}px`;
@@ -128,33 +130,34 @@ export default class GraphicPuzzle extends Puzzle {
 		pieces.forEach((piece) => {
 			this.#board.dom.appendChild(piece.dom);
 		});
-		this.#puzzle.pieces = pieces;
+		this.#puzzle.pieces.clear();
+		pieces.forEach((piece) => {
+			this.#puzzle.pieces.set(piece.id, piece);
+		});
 		this.#board.dom.addEventListener('mousedown', this.#startDropHandle);
 		return pieces;
 	}
 
 	shuffle() {
-		if (this.#puzzle.pieces.length === 0) {
+		if (this.#puzzle.pieces.size === 0) {
 			throw new SyntaxError(`'cut' must be called first.`);
 		}
-		this.#puzzle.pieces.forEach((piece) => {
-			const x = Math.floor(Math.random() * (this.#board.width - piece.dom.offsetWidth));
-			const y = Math.floor(Math.random() * (this.#board.height - piece.dom.offsetHeight));
-			piece.dom.style.top = `${y}px`;
-			piece.dom.style.left = `${x}px`;
+		this.#puzzle.pieces.forEach((piece, key) => {
+			const x = Math.floor(Math.random() * (this.#board.width - piece.width));
+			const y = Math.floor(Math.random() * (this.#board.height - piece.height));
+			piece.setPosition(y, x);
 		});
 	}
 
 	#startDrop(event) {
 		const { target } = event;
-		console.log(target);
 		if (target instanceof HTMLCanvasElement) {
-			const piece = target.parentElement;
+			const piece = this.#puzzle.pieces.get(target.parentElement.id);
 			this.#pieceInMotion = piece;
-			piece.classList.add('dragging');
+			piece.dom.classList.add('dragging');
 			document.addEventListener('mousemove', this.#doDragOverHandle);
 			document.addEventListener('mouseup', this.#doDrop.bind(this), {once: true});
-			piece.style.zIndex = `${this.#rollingZ}`;
+			piece.zIndex = this.#rollingZ;
 			this.#rollingZ++;
 		}
 	}
@@ -162,23 +165,30 @@ export default class GraphicPuzzle extends Puzzle {
 	#doDragOver(event) {
 		const piece = this.#pieceInMotion;
 		const { movementX, movementY } = event;
-		const { offsetLeft, offsetTop } = piece;
-		piece.style.left = `${offsetLeft + movementX}px`;
-		piece.style.top = `${offsetTop + movementY}px`;
+		const { offsetLeft, offsetTop } = piece.dom;
+		piece.setPosition(offsetTop + movementY, offsetLeft + movementX);
 	}
 
 	#doDrop(event) {
 		const piece = this.#pieceInMotion;
 		const { width: boardWidth, height: boardHeight } = this.#board;
-		let left = Math.max(0, piece.offsetLeft);
-		let top = Math.max(0, piece.offsetTop);
-		left = Math.min(boardWidth - piece.offsetWidth, left);
-		top = Math.min(boardHeight - piece.offsetHeight, top);
-		piece.style.left = `${left}px`;
-		piece.style.top = `${top}px`;
-		piece.classList.remove('dragging');
+		let left = Math.max(0, piece.left);
+		let top = Math.max(0, piece.top);
+		left = Math.min(boardWidth - piece.width, left);
+		top = Math.min(boardHeight - piece.height, top);
+		piece.setPosition(top, left);
+		piece.dom.classList.remove('dragging');
 		document.removeEventListener('mousemove', this.#doDragOverHandle);
 		this.#pieceInMotion = null;
-		// piece.dispatchEvent(new CustomEvent('dropped'));
+		const matches = this.#pattern.findMatchingPieces(piece);
+		if (matches.firstMatchingPiece) {
+			const matchedPieceInfo = matches.firstMatchingPiece;
+			this.#pattern.mergePieces(piece, matchedPieceInfo);
+			if (this.#sounds.drop) {
+				this.#sounds.drop.play();
+			}
+			// piece.dispatchEvent(new CustomEvent('dropped'));
+		}
+
 	}
 }
