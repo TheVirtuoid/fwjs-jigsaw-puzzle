@@ -1,8 +1,18 @@
 {
   "name": "fwjs-jigsaw-puzzle",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "jigsawpuzzle",
+    "javascript",
+    "cypress",
+    "vite"
+  ],
+  "homepage": "https://github.com/TheVirtuoid/fwjs-jigsaw-puzzle",
+  "description": "An HTML/CSS/JS jigsaw puzzle game presented by FunWithJavaScript",
+  "author": "TheVirtuoid a.k.a Mike Smith <thevirtuoid@gmail.com> (https://funwithjavascript.com)",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -11,11 +21,8 @@
     "test:ci": "npx cypress run"
   },
   "devDependencies": {
-    "cypress": "^12.12.0",
-    "postcss-nesting": "^11.2.2",
-    "vite": "^4.1.5"
-  },
-  "dependencies": {
-    "phaser": "^3.55.2"
+    "cypress": "^12.14.0",
+    "postcss-nesting": "^11.3.0",
+    "vite": "^4.3.9"
   }
 }

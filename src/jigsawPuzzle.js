@@ -1,7 +1,7 @@
 import '../src/css/jigasw-puzzle.pcss';
 // import GraphicPiece from "./js/classes/graphics/GraphicPiece.js";
 import GraphicPuzzle from "./js/classes/graphic/GraphicPuzzle.js";
-import Cut16Square from "./js/classes/patterns/Cut16Sqaure.js";
+import Cut16Square from "./js/classes/patterns/Cut16Square.js";
 
 const puzzleParams = {
 	width: 500,
