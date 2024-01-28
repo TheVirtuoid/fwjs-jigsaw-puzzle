@@ -2,7 +2,6 @@ import GraphicPiece from "../graphic/GraphicPiece.js";
 import Pattern from "./Pattern.js";
 import GraphicVertex from "../graphic/GraphicVertex.js";
 import Vertex from "../Vertex.js";
-import GraphicImage from "../graphic/GraphicImage.js";
 
 export default class Cut16Square extends Pattern {
 	static #pieces = 16;
@@ -110,7 +109,6 @@ export default class Cut16Square extends Pattern {
 				left: 0
 			}
 		};
-		// console.log('--------------start vertex matches-------------');
 		piece.vertices.forEach(({ vertexId }) => {
 			const placedPieceInfo = piece.getVertexInfo(vertexId);
 			const { pieces } = this.#vertices.get(vertexId);
@@ -126,7 +124,6 @@ export default class Cut16Square extends Pattern {
 				}
 			});
 		});
-		// console.log('--------------end vertex matches-------------');
 		return matches;
 	}
 
