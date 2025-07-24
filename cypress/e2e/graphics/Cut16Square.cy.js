@@ -1,5 +1,5 @@
 // Cut 16 pieces in a square
-import Cut16Square from "../../../src/js/classes/patterns/Cut16Sqaure.js";
+import Cut16Square from "../../../src/js/classes/patterns/Cut16Square.js";
 import { imageUrl, params } from "../../fixtures/graphicData.js";
 
 let cut16;

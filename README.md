@@ -1,6 +1,13 @@
 # fwjs-jigsaw-puzzle
 Fun With JavaScript presents Jigsaw Puzzle
 
+## NOTICE:
+
+This repository has been retired and is no longer being maintained. It is provided for historical purposes only.
+
+It may break at any time.
+
+
 ## Design
 
 Note: For all immutable objects, use ```Object.seal()```.
